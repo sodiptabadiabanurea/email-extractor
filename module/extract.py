@@ -1,5 +1,7 @@
+import re
+import sys
 import requests
-import re,sys
+import concurrent.futures as cf
 from .urls import geturl
 
 banner = """
@@ -35,10 +37,26 @@ class extract:
            self.bingo = self.validator(self.emails)
            return self.bingo
 
+    #
+    def filter(self,email):
+        for dn in open("dn.txt","r").readlines():
+            dn = dn.split("\n")
+            if email in dn:
+               return 
+
     def emails(self):
         self.other_page = geturl(self.site).all()
-        self.object = []
+        self.result_sementara = []
         for self.url in self.validator(self.other_page):
-            print (f"   [*] {self.url}")
-            self.object.append(self.getemail(self.url))
+            print (f"  [*] {self.url}")
+            self.result_sementara.append(self.getemail(self.url))
+
+        self.object = []
+        with cf.ThreadPoolExecutor(max_workers=5) as cft:
+             output = [cft.submit(self.filter,email) for email in self.result_sementara[0]]
+             for y in output:
+                 if y:
+                    print (y.result())
+                    self.object.append(y.result())
+
         return self.validator(self.object)
