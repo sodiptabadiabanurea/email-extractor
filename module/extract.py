@@ -39,7 +39,7 @@ class extract:
 
     #
     def filter(self,email):
-        for dn in open("dn.txt","r").readlines():
+        for dn in open("module/dn.txt","r").readlines():
             dn = dn.split("\n")
             if email in dn:
                return 
